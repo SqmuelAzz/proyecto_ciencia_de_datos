@@ -65,14 +65,25 @@ def add_person(df: pd.DataFrame) -> pd.DataFrame:
 # ---------- Pendientes (Partes 3 a 8): por ahora devuelven df sin cambios ----------
 
 def add_cabin_features(df: pd.DataFrame) -> pd.DataFrame:    # Pasos 11 y 24
+    """Agrega 'TCabin' (primera letra de Cabin, 'X' si es nula) y 'HasCabin' (0/1)."""
+    df = df.copy()
+    df["TCabin"] = df["Cabin"].str[0].fillna("X")
+    df["HasCabin"] = df["Cabin"].notna().astype(int)
     return df
 
 
 def add_family_features(df: pd.DataFrame) -> pd.DataFrame:   # Paso 14
+    """Agrega 'Familia' = SibSp + Parch y 'Alone' ('with Family' si Familia > 0, 'Alone' si no)."""
+    df = df.copy()
+    df["Familia"] = df["SibSp"] + df["Parch"]
+    df["Alone"] = np.where(df["Familia"] > 0, "with Family", "Alone")
     return df
 
 
 def add_survivor_label(df: pd.DataFrame) -> pd.DataFrame:    # Paso 16
+    """Agrega 'Survivor' mapeando 0 -> 'No' y 1 -> 'Yes' (solo para etiquetar gráficos)."""
+    df = df.copy()
+    df["Survivor"] = df["Survived"].map({0: "No", 1: "Yes"})
     return df
 
 

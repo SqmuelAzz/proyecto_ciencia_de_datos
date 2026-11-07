@@ -40,3 +40,15 @@ def test_validate_bronze_rejects_missing_columns(sample):
 def test_add_person_is_explicit_about_unknown_age(sample):
     out = de.add_person(sample)
     assert out["Person"].tolist() == ["male", "female", "female", "child", "female", "male"]
+
+def test_family_features(sample):
+    out = de.add_family_features(sample)
+    assert out["Familia"].tolist() == [1, 1, 0, 4, 0, 0]
+    assert out["Alone"].tolist() == ["with Family", "with Family", "Alone",
+                                     "with Family", "Alone", "Alone"]
+
+
+def test_cabin_features(sample):
+    out = de.add_cabin_features(sample)
+    assert out["TCabin"].tolist() == ["X", "C", "X", "X", "B", "X"]
+    assert out["HasCabin"].tolist() == [0, 1, 0, 0, 1, 0]
