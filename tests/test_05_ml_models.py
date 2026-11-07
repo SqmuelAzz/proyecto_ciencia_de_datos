@@ -37,3 +37,22 @@ def test_split_is_stratified_and_reproducible(toy):
     b = ml.split(X, y, test_size=0.25, random_state=1)
     pd.testing.assert_index_equal(a[0].index, b[0].index)
     assert abs(a[2].mean() - a[3].mean()) < 0.03
+
+def test_group_age_imputer_uses_only_training_statistics():
+    train = pd.DataFrame({"Sex": ["male", "male", "female"], "Age": [10.0, 20.0, 40.0]})
+    test = pd.DataFrame({"Sex": ["male", "other"], "Age": [np.nan, np.nan]})
+    out = ml.GroupAgeImputer(group_cols=("Sex",)).fit(train).transform(test)
+    assert out.loc[0, "Age"] == 15.0                          # promedio de hombres en TRAIN
+    assert out.loc[1, "Age"] == pytest.approx(70 / 3)         # grupo no visto: promedio global de TRAIN
+
+
+def test_pipeline_fits_and_predicts_probabilities(toy):
+    X, y = toy
+    pipe = ml.build_pipeline(ml.get_candidates(42)["logreg"]).fit(X, y)
+    proba = pipe.predict_proba(X)[:, 1]
+    assert proba.shape == (len(X),) and ((0 <= proba) & (proba <= 1)).all()
+
+
+def test_candidates_include_baseline_and_are_seeded():
+    cands = ml.get_candidates(42)
+    assert "dummy" in cands and "logreg" in cands and len(cands) >= 5
