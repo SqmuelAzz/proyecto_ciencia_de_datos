@@ -28,6 +28,10 @@ TITLE_MAP = {                        # consolidación de títulos (Paso 26)
 }
 MAIN_TITLES = ["Mr", "Mrs", "Miss"]
 
+SILVER_REQUIRED = [                  # columnas que NO pueden tener nulos en Silver (Paso 33)
+    "Survived", "Pclass", "Age", "Fare", "Embarked", "Person", "Alone", "TCabin",
+    "TTitulo", "NSex", "NEmbarked", "NCabin", "NTitulo",
+]
 
 # ---------- Implementadas (Parte 2) ----------
 
@@ -142,10 +146,19 @@ def encode_categoricals(df: pd.DataFrame) -> pd.DataFrame:   # Pasos 21, 23, 24 
     return df
 
 def drop_original_columns(df: pd.DataFrame) -> pd.DataFrame:  # Paso 32
-    return df
+    """Devuelve una COPIA sin Name, Sex, Embarked y Cabin."""
+    return df.drop(columns=["Name", "Sex", "Embarked", "Cabin"])
 
 
 def validate_silver(df: pd.DataFrame) -> pd.DataFrame:       # Paso 33
+    """Contrato de salida: sin nulos en las columnas clave (AgeOriginal sí puede tenerlos)."""
+    faltantes = [c for c in SILVER_REQUIRED if c not in df.columns]
+    if faltantes:
+        raise ValueError(f"Faltan columnas en Silver: {faltantes}")
+    nulos = df[SILVER_REQUIRED].isnull().sum()
+    nulos = nulos[nulos > 0]
+    if not nulos.empty:
+        raise ValueError(f"Silver tiene nulos: {nulos.to_dict()}")
     return df
 
 

@@ -79,3 +79,24 @@ def test_functions_do_not_mutate_their_input(sample):
                de.impute_embarked, de.impute_age):
         fn(sample)
     pd.testing.assert_frame_equal(sample, before)
+
+def test_build_silver_end_to_end(sample):
+    out = de.validate_silver(de.build_silver(sample))
+    assert len(out) == len(sample)
+    for col in ["Person", "Alone", "TCabin", "TTitulo", "NSex", "NEmbarked", "NCabin",
+                "NTitulo", "AgeOriginal", "Survivor"]:
+        assert col in out.columns
+    assert out.loc[1, "NCabin"] == de.DECKS.index("C")   # el mapa de cubiertas es fijo
+
+
+def test_validate_silver_fails_on_nulls(sample):
+    out = de.build_silver(sample)
+    out.loc[0, "Fare"] = np.nan
+    with pytest.raises(ValueError):
+        de.validate_silver(out)
+
+
+def test_drop_original_columns(sample):
+    out = de.drop_original_columns(sample)
+    assert not {"Name", "Sex", "Embarked", "Cabin"} & set(out.columns)
+    assert "Name" in sample.columns       # la entrada no se modifica
