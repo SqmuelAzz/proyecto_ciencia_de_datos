@@ -122,7 +122,7 @@ Los grupos de edad suman 575 pasajeros porque los 137 sin edad registrada no se 
 - **Muestra pequeña:** 891 pasajeros etiquetados y 179 de prueba, de ahí el intervalo de confianza amplio y que la ventaja frente a la regla de género no sea concluyente en prueba.
 - **Sobreajuste moderado:** ROC-AUC de 0.994 en entrenamiento frente a 0.887 en validación.
 - **Desempeño desigual entre subgrupos:** el recall es muy bajo para los hombres (0.353) y para la 3.ª clase (0.495): el modelo detecta mal a los sobrevivientes de los grupos con menor tasa de supervivencia.
-- **Datos faltantes:** cerca del 20 % de las edades se imputa, lo que puede sesgar las predicciones para pasajeros sin edad registrada.
+- **Datos faltantes:** el 19.9 % de las edades se imputa, lo que puede sesgar las predicciones para pasajeros sin edad registrada.
 - **Variables sensibles:** el modelo usa `Sex` y `Pclass` (y `TTitulo`, que codifica el sexo). Predice bien lo que ocurrió, pero eso no significa que esas variables sean apropiadas para tomar decisiones sobre personas hoy.
 - **Asociación, no causalidad:** la importancia de una variable indica cuánto ayuda a predecir, no que cause la supervivencia.
 
