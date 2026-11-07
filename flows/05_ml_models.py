@@ -45,14 +45,13 @@ SCORING = ["accuracy", "precision", "recall", "f1", "roc_auc"]
 MODEL_NAME = "titanic_model_v1"
 FINAL_ESTIMATOR = "hgb"                 # nombre en get_candidates()
 FINAL_PARAMS = {                        # mejores hiperparámetros del Paso 57
-    "model__learning_rate": 0.05,
-    "model__max_depth": 3,
-    "model__max_iter": 200,
     "model__l2_regularization": 1.0,
+    "model__learning_rate": 0.1,
+    "model__max_depth": 4,
+    "model__max_iter": 200,
 }
 USE_CABIN_FEATURES = False              # decisión del Paso 61
-THRESHOLD = 0.5                         # decisión del Paso 53
-
+THRESHOLD = 0.61                        # decisión del Paso 53
 
 # ---------------------------------------------------------------------------
 # Parte 10: datos y división
