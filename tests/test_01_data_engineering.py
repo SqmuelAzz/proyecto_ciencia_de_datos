@@ -52,3 +52,30 @@ def test_cabin_features(sample):
     out = de.add_cabin_features(sample)
     assert out["TCabin"].tolist() == ["X", "C", "X", "X", "B", "X"]
     assert out["HasCabin"].tolist() == [0, 1, 0, 0, 1, 0]
+
+def test_titles_are_extracted_and_consolidated(sample):
+    out = de.consolidate_titles(de.add_title(sample))
+    assert out["TTitulo"].tolist() == ["Mr", "Mrs", "Miss", "Mr", "Mrs", "Otro"]
+
+
+def test_impute_embarked_uses_mode(sample):
+    out = de.impute_embarked(sample)
+    assert out["Embarked"].isna().sum() == 0
+    assert out.loc[3, "Embarked"] == "S"
+
+
+def test_impute_age_by_sex_keeps_original(sample):
+    out = de.impute_age(sample)
+    assert out["Age"].isna().sum() == 0
+    assert out.loc[2, "Age"] == pytest.approx(35.5)     # promedio de mujeres: (38 + 33) / 2
+    assert out.loc[5, "Age"] == pytest.approx(12.0)     # promedio de hombres: (22 + 2) / 2
+    assert out["AgeOriginal"].isna().sum() == 2
+    assert out["AgeImputada"].tolist() == [False, False, True, False, False, True]
+
+
+def test_functions_do_not_mutate_their_input(sample):
+    before = sample.copy(deep=True)
+    for fn in (de.add_person, de.add_family_features, de.add_cabin_features,
+               de.impute_embarked, de.impute_age):
+        fn(sample)
+    pd.testing.assert_frame_equal(sample, before)

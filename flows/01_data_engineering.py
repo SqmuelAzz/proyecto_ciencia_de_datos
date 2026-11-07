@@ -88,24 +88,58 @@ def add_survivor_label(df: pd.DataFrame) -> pd.DataFrame:    # Paso 16
 
 
 def add_title(df: pd.DataFrame) -> pd.DataFrame:             # Paso 25
+    """Extrae el título del nombre ('Braund, Mr. Owen' -> 'Mr')."""
+    df = df.copy()
+    df["TTitulo"] = df["Name"].str.extract(r",\s*([^.]+)\.", expand=False).str.strip()
     return df
 
 
 def consolidate_titles(df: pd.DataFrame) -> pd.DataFrame:    # Paso 26
+    """Agrupa títulos raros con TITLE_MAP; lo que no esté en MAIN_TITLES pasa a 'Otro'."""
+    df = df.copy()
+    titulos = df["TTitulo"].replace(TITLE_MAP)
+    df["TTitulo"] = titulos.where(titulos.isin(MAIN_TITLES), "Otro")
     return df
 
 
 def impute_embarked(df: pd.DataFrame) -> pd.DataFrame:       # Paso 21
+    """Rellena 'Embarked' con la moda (la categoría más frecuente)."""
+    df = df.copy()
+    n_faltantes = int(df["Embarked"].isnull().sum())
+    moda = df["Embarked"].mode()[0]
+    df["Embarked"] = df["Embarked"].fillna(moda)
+    log.info("Embarked: %d faltantes rellenados con la moda '%s'", n_faltantes, moda)
     return df
 
 
 def impute_age(df: pd.DataFrame) -> pd.DataFrame:            # Paso 22
+    """Imputa 'Age' con el promedio por 'Sex'.
+
+    Conserva la edad original en 'AgeOriginal' (con NaN) y marca las filas
+    imputadas en 'AgeImputada' (bool). Usada para EXPLORAR; el modelo (Parte 11)
+    vuelve a imputar solo con datos de entrenamiento.
+    """
+    df = df.copy()
+    df["AgeOriginal"] = df["Age"]
+    df["AgeImputada"] = df["Age"].isna()
+    std_antes = df["Age"].std()
+    promedios = df.groupby("Sex")["Age"].mean()
+    df["Age"] = df["Age"].fillna(df["Sex"].map(promedios))
+    std_despues = df["Age"].std()
+    # Reto 22.1: la desviación baja porque se agregan muchos valores idénticos (el promedio)
+    log.info("Edad imputada en %d filas. Desv. estándar: antes %.2f, después %.2f",
+             int(df["AgeImputada"].sum()), std_antes, std_despues)
     return df
 
 
-def encode_categoricals(df: pd.DataFrame) -> pd.DataFrame:   # Pasos 21, 23, 24, 26
+def encode_categoricals(df: pd.DataFrame) -> pd.DataFrame:   # Pasos 21, 23, 24 y 26
+    """Versiones numéricas (prefijo N) de las categóricas."""
+    df = df.copy()
+    df["NEmbarked"] = df["Embarked"].map({"S": 0, "C": 1, "Q": 2})
+    df["NSex"] = df["Sex"].map({"female": 0, "male": 1})
+    df["NCabin"] = df["TCabin"].map({letra: i for i, letra in enumerate(DECKS)})
+    df["NTitulo"] = df["TTitulo"].map({"Mr": 0, "Mrs": 1, "Miss": 2, "Otro": 3})
     return df
-
 
 def drop_original_columns(df: pd.DataFrame) -> pd.DataFrame:  # Paso 32
     return df
