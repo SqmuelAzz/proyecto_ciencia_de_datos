@@ -4,7 +4,7 @@ from __future__ import annotations
 import importlib
 import json
 import platform
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import joblib
@@ -17,8 +17,7 @@ from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (accuracy_score, f1_score, precision_score, recall_score,
-                             roc_auc_score)
+from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
@@ -204,7 +203,7 @@ def evaluate_on_test(pipeline, X_test, y_test, threshold: float = 0.5) -> dict:
         "f1": float(f1_score(y_test, pred, zero_division=0)),
         "roc_auc": float(roc_auc_score(y_test, proba)),
         "threshold": float(threshold),
-        "n_test": int(len(y_test)),
+        "n_test": len(y_test),
     }
 
 
@@ -253,7 +252,7 @@ def save_model(pipeline: Pipeline, metadata: dict, name: str = MODEL_NAME,
     meta = {
         **metadata,
         "name": name,
-        "saved_at": datetime.now(timezone.utc).isoformat(),
+        "saved_at": datetime.now(UTC).isoformat(),
         "python_version": platform.python_version(),
         "sklearn_version": sklearn.__version__,
         "pandas_version": pd.__version__,
@@ -324,7 +323,7 @@ def run(in_dir: Path | None = None, models_dir: Path = MODELS) -> Path:
         "target": TARGET,
         "threshold": THRESHOLD,
         "random_state": settings.random_state,
-        "n_train": int(len(X)),
+        "n_train": len(X),
         "data_sha256": sha256_of(silver_path),
         "metrics": metrics,
     }
